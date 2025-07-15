@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Management</title>
+    <title>Student Management System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,17 +67,9 @@
             cursor: pointer;
         }
 
-        td button:nth-child(1) {
-            background-color: #6c757d; 
-        }
-
-        td button:nth-child(2) {
-            background-color: #2196F3; 
-        }
-
-        td button:nth-child(3) {
-            background-color: #f44336; 
-        }
+        td button:nth-child(1) { background-color: #6c757d; }
+        td button:nth-child(2) { background-color: #2196F3; }
+        td button:nth-child(3) { background-color: #f44336; }
     </style>
 </head>
 <body>
@@ -99,9 +91,7 @@
                 <th>Name</th><th>Age</th><th>Email</th><th>Roll No</th><th>Course</th><th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Student rows go here -->
-        </tbody>
+        <tbody></tbody>
     </table>
 
     <script>
@@ -135,9 +125,7 @@
         const tableBody = document.querySelector('#studentTable tbody');
         let editingIndex = -1;
 
-        window.onload = () => {
-            displayAllStudents();
-        };
+        window.onload = () => displayAllStudents();
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
@@ -148,12 +136,13 @@
             const rollNo = document.getElementById('rollNo').value.trim();
             const course = document.getElementById('course').value.trim();
 
-            // Validation
+           
             if (!/^[A-Za-z ]+$/.test(name)) {
                 alert("Name must contain letters only.");
                 return;
             }
 
+          
             if (!/^\d{10}$/.test(rollNo)) {
                 alert("Roll number must be exactly 10 digits.");
                 return;

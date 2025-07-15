@@ -61,6 +61,11 @@
         td button {
             margin-right: 5px;
             background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
         }
 
         td button:last-child {
@@ -69,13 +74,13 @@
     </style>
 </head>
 <body>
-    <h2>Student Management System </h2>
+    <h2>Student Management System</h2>
 
     <form id="studentForm">
         <input type="text" id="name" placeholder="Name" required />
         <input type="number" id="age" placeholder="Age" required />
         <input type="email" id="email" placeholder="Email" required />
-        <input type="text" id="rollNo" placeholder="Roll No" required />
+        <input type="text" id="rollNo" placeholder="Roll No (10 digits)" required />
         <input type="text" id="course" placeholder="Course" required />
         <br>
         <button type="submit">Add / Update Student</button>
@@ -126,17 +131,26 @@
             const rollNo = document.getElementById('rollNo').value.trim();
             const course = document.getElementById('course').value.trim();
 
+            // Validations
             if (!/^[A-Za-z ]+$/.test(name)) {
                 alert("Name must contain letters only.");
                 return;
             }
             if (!/^\d{10}$/.test(rollNo)) {
-                 alert("Roll number must be exactly 10 digits.");
-                 return;
+                alert("Roll number must be exactly 10 digits.");
+                return;
+            }
+
+            let students = JSON.parse(localStorage.getItem('students')) || [];
+
+            // Duplicate Roll No Check
+            const duplicate = students.find((s, index) => s.rollNo === rollNo && index !== editingIndex);
+            if (duplicate) {
+                alert("This roll number already exists. Please enter a unique one.");
+                return;
             }
 
             const student = new Student(name, age, email, rollNo, course);
-            let students = JSON.parse(localStorage.getItem('students')) || [];
 
             if (editingIndex === -1) {
                 students.push(student);

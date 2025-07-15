@@ -3,16 +3,13 @@
 <head>
   <title>Student Management System</title>
   <style>
+    /* same CSS as you gave */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       background: #f2f2f2;
     }
-
-    h2 {
-      color: #333;
-    }
-
+    h2 { color: #333; }
     form {
       margin-bottom: 20px;
       background: #fff;
@@ -20,13 +17,11 @@
       border-radius: 10px;
       box-shadow: 0 0 5px #ccc;
     }
-
     input {
       padding: 8px;
       margin: 8px;
       width: 200px;
     }
-
     button {
       padding: 10px 20px;
       margin-top: 10px;
@@ -36,28 +31,23 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
     button:hover {
       opacity: 0.9;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       background: white;
     }
-
     th, td {
       padding: 10px;
       border: 1px solid #ddd;
       text-align: left;
     }
-
     th {
       background: #4CAF50;
       color: white;
     }
-
     td button {
       margin-right: 5px;
       padding: 5px 10px;
@@ -66,7 +56,6 @@
       border-radius: 3px;
       cursor: pointer;
     }
-
     td button:nth-child(1) { background-color: #6c757d; }
     td button:nth-child(2) { background-color: #2196F3; }
     td button:nth-child(3) { background-color: #f44336; }
@@ -74,7 +63,7 @@
 </head>
 <body>
 
-<h2>Student Management System</h2>
+<h2>Student Management System (Inheritance + Polymorphism + Abstraction)</h2>
 
 <form id="studentForm">
   <input type="text" id="name" placeholder="Name" required />
@@ -96,6 +85,7 @@
 </table>
 
 <script>
+  // Abstract base class
   class Person {
     constructor(name, age, email) {
       this.name = name;
@@ -105,6 +95,10 @@
 
     displayInfo() {
       return `Name: ${this.name}, Age: ${this.age}, Email: ${this.email}`;
+    }
+
+    getRole() {
+      throw new Error("getRole() must be implemented by subclass.");
     }
   }
 
@@ -117,6 +111,10 @@
 
     displayInfo() {
       return `Student: ${this.name}, Roll No: ${this.rollNo}, Course: ${this.course}`;
+    }
+
+    getRole() {
+      return "Student";
     }
   }
 
@@ -147,8 +145,7 @@
 
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
-    // Duplicate Roll No Check (only on Add)
-    const duplicate = students.find((s, index) => s.rollNo === rollNo && index !== editingIndex);
+    const duplicate = students.find((s, i) => s.rollNo === rollNo && i !== editingIndex);
     if (duplicate) {
       alert("This roll number already exists.");
       return;
@@ -170,9 +167,10 @@
 
   function displayAllStudents() {
     tableBody.innerHTML = '';
-    const raw = JSON.parse(localStorage.getItem('students')) || [];
+    const rawData = JSON.parse(localStorage.getItem('students')) || [];
 
-    const students = raw.map(s => new Student(s.name, s.age, s.email, s.rollNo, s.course));
+    // Rebuild Student class objects from plain JSON
+    const students = rawData.map(s => new Student(s.name, s.age, s.email, s.rollNo, s.course));
     students.forEach((student, index) => addRowToTable(student, index));
   }
 
@@ -185,7 +183,7 @@
       <td>${student.rollNo}</td>
       <td>${student.course}</td>
       <td>
-        <button onclick="showInfo(${index})">Info</button>
+        <button onclick="alert('${student.displayInfo()}\\nRole: ${student.getRole()}')">Info</button>
         <button onclick="editStudent(${index})">Edit</button>
         <button onclick="deleteStudent(${index})">Delete</button>
       </td>
@@ -193,16 +191,9 @@
     tableBody.appendChild(row);
   }
 
-  function showInfo(index) {
+  function editStudent(index) {
     const raw = JSON.parse(localStorage.getItem('students')) || [];
     const s = raw[index];
-    const student = new Student(s.name, s.age, s.email, s.rollNo, s.course);
-    alert(student.displayInfo());
-  }
-
-  function editStudent(index) {
-    const students = JSON.parse(localStorage.getItem('students')) || [];
-    const s = students[index];
 
     document.getElementById('name').value = s.name;
     document.getElementById('age').value = s.age;

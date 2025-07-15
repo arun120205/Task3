@@ -147,7 +147,7 @@
 
     let students = JSON.parse(localStorage.getItem('students')) || [];
 
-    // Duplicate Roll No Check (only on Add)
+    
     const duplicate = students.find((s, index) => s.rollNo === rollNo && index !== editingIndex);
     if (duplicate) {
       alert("This roll number already exists.");

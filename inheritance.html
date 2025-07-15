@@ -131,7 +131,7 @@
             const rollNo = document.getElementById('rollNo').value.trim();
             const course = document.getElementById('course').value.trim();
 
-            // Validations
+            
             if (!/^[A-Za-z ]+$/.test(name)) {
                 alert("Name must contain letters only.");
                 return;
@@ -143,7 +143,7 @@
 
             let students = JSON.parse(localStorage.getItem('students')) || [];
 
-            // Duplicate Roll No Check
+            
             const duplicate = students.find((s, index) => s.rollNo === rollNo && index !== editingIndex);
             if (duplicate) {
                 alert("This roll number already exists. Please enter a unique one.");

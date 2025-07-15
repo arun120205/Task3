@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Student Management System</title>
+  <title>Student & Teacher Management</title>
   <style>
-    /* same CSS as you gave */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
@@ -17,7 +16,7 @@
       border-radius: 10px;
       box-shadow: 0 0 5px #ccc;
     }
-    input {
+    input, select {
       padding: 8px;
       margin: 8px;
       width: 200px;
@@ -63,29 +62,33 @@
 </head>
 <body>
 
-<h2>Student Management System (Inheritance + Polymorphism + Abstraction)</h2>
+<h2>Student & Teacher Management System</h2>
 
-<form id="studentForm">
+<form id="userForm">
+  <select id="userType" required>
+    <option value="Student">Student</option>
+    <option value="Teacher">Teacher</option>
+  </select>
   <input type="text" id="name" placeholder="Name" required />
   <input type="number" id="age" placeholder="Age" required />
   <input type="email" id="email" placeholder="Email" required />
-  <input type="text" id="rollNo" placeholder="Roll No (10 digits)" required />
-  <input type="text" id="course" placeholder="Course" required />
+  <input type="text" id="idField" placeholder="Roll No / Staff ID" required />
+  <input type="text" id="infoField" placeholder="Course / Department" required />
   <br>
-  <button type="submit">Add / Update Student</button>
+  <button type="submit">Add / Update</button>
 </form>
 
-<table id="studentTable">
+<table>
   <thead>
     <tr>
-      <th>Name</th><th>Age</th><th>Email</th><th>Roll No</th><th>Course</th><th>Actions</th>
+      <th>Name</th><th>Age</th><th>Email</th><th>ID</th><th>Course/Dept</th><th>Actions</th>
     </tr>
   </thead>
-  <tbody></tbody>
+  <tbody id="tableBody"></tbody>
 </table>
 
 <script>
-  // Abstract base class
+
   class Person {
     constructor(name, age, email) {
       this.name = name;
@@ -118,100 +121,132 @@
     }
   }
 
-  const form = document.getElementById('studentForm');
-  const tableBody = document.querySelector('#studentTable tbody');
-  let editingIndex = -1;
+  class Teacher extends Person {
+    constructor(name, age, email, staffId, department) {
+      super(name, age, email);
+      this.staffId = staffId;
+      this.department = department;
+    }
 
-  window.onload = () => displayAllStudents();
+    displayInfo() {
+      return `Teacher: ${this.name}, Staff ID: ${this.staffId}, Dept: ${this.department}`;
+    }
+
+    getRole() {
+      return "Teacher";
+    }
+  }
+
+  const form = document.getElementById('userForm');
+  const tableBody = document.getElementById('tableBody');
+  let editingIndex = -1;
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
+    const type = document.getElementById('userType').value;
     const name = document.getElementById('name').value.trim();
     const age = document.getElementById('age').value;
     const email = document.getElementById('email').value.trim();
-    const rollNo = document.getElementById('rollNo').value.trim();
-    const course = document.getElementById('course').value.trim();
+    const id = document.getElementById('idField').value.trim();
+    const info = document.getElementById('infoField').value.trim();
 
     if (!/^[A-Za-z ]+$/.test(name)) {
-      alert("Name must contain letters only.");
+      alert("Name must contain only letters.");
       return;
     }
 
-    if (!/^\d{10}$/.test(rollNo)) {
-      alert("Roll number must be exactly 10 digits.");
-      return;
-    }
+    const users = JSON.parse(localStorage.getItem('users')) || [];
 
-    let students = JSON.parse(localStorage.getItem('students')) || [];
-
-    const duplicate = students.find((s, i) => s.rollNo === rollNo && i !== editingIndex);
+    const duplicate = users.find((u, i) => u.id === id && i !== editingIndex);
     if (duplicate) {
-      alert("This roll number already exists.");
+      alert("This ID already exists.");
       return;
     }
 
-    const student = new Student(name, age, email, rollNo, course);
+    const user = { type, name, age, email, id, info };
 
     if (editingIndex === -1) {
-      students.push(student);
+      users.push(user);
     } else {
-      students[editingIndex] = student;
+      users[editingIndex] = user;
       editingIndex = -1;
     }
 
-    localStorage.setItem('students', JSON.stringify(students));
-    displayAllStudents();
+    localStorage.setItem('users', JSON.stringify(users));
     form.reset();
+    displayAll();
   });
 
-  function displayAllStudents() {
+  function displayAll() {
     tableBody.innerHTML = '';
-    const rawData = JSON.parse(localStorage.getItem('students')) || [];
+    const data = JSON.parse(localStorage.getItem('users')) || [];
 
-    // Rebuild Student class objects from plain JSON
-    const students = rawData.map(s => new Student(s.name, s.age, s.email, s.rollNo, s.course));
-    students.forEach((student, index) => addRowToTable(student, index));
+    data.forEach((u, index) => {
+      let obj;
+      if (u.type === "Student") {
+        obj = new Student(u.name, u.age, u.email, u.id, u.info);
+      } else {
+        obj = new Teacher(u.name, u.age, u.email, u.id, u.info);
+      }
+      addRow(obj, index, u.type);
+    });
   }
 
-  function addRowToTable(student, index) {
+  function addRow(userObj, index, type) {
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>${student.name}</td>
-      <td>${student.age}</td>
-      <td>${student.email}</td>
-      <td>${student.rollNo}</td>
-      <td>${student.course}</td>
+      <td>${userObj.name}</td>
+      <td>${userObj.age}</td>
+      <td>${userObj.email}</td>
+      <td>${type === 'Student' ? userObj.rollNo : userObj.staffId}</td>
+      <td>${type === 'Student' ? userObj.course : userObj.department}</td>
       <td>
-        <button onclick="alert('${student.displayInfo()}\\nRole: ${student.getRole()}')">Info</button>
-        <button onclick="editStudent(${index})">Edit</button>
-        <button onclick="deleteStudent(${index})">Delete</button>
+        <button onclick="showInfo(${index})">Info</button>
+        <button onclick="editUser(${index})">Edit</button>
+        <button onclick="deleteUser(${index})">Delete</button>
       </td>
     `;
     tableBody.appendChild(row);
   }
 
-  function editStudent(index) {
-    const raw = JSON.parse(localStorage.getItem('students')) || [];
-    const s = raw[index];
+  function showInfo(index) {
+    const data = JSON.parse(localStorage.getItem('users')) || [];
+    const u = data[index];
+    let obj;
+    if (u.type === "Student") {
+      obj = new Student(u.name, u.age, u.email, u.id, u.info);
+    } else {
+      obj = new Teacher(u.name, u.age, u.email, u.id, u.info);
+    }
+    alert(obj.displayInfo() + "\nRole: " + obj.getRole());
+  }
 
-    document.getElementById('name').value = s.name;
-    document.getElementById('age').value = s.age;
-    document.getElementById('email').value = s.email;
-    document.getElementById('rollNo').value = s.rollNo;
-    document.getElementById('course').value = s.course;
+  function editUser(index) {
+    const data = JSON.parse(localStorage.getItem('users')) || [];
+    const u = data[index];
+
+    document.getElementById('userType').value = u.type;
+    document.getElementById('name').value = u.name;
+    document.getElementById('age').value = u.age;
+    document.getElementById('email').value = u.email;
+    document.getElementById('idField').value = u.id;
+    document.getElementById('infoField').value = u.info;
 
     editingIndex = index;
   }
 
-  function deleteStudent(index) {
-    let students = JSON.parse(localStorage.getItem('students')) || [];
-    if (confirm("Are you sure you want to delete this student?")) {
-      students.splice(index, 1);
-      localStorage.setItem('students', JSON.stringify(students));
-      displayAllStudents();
+  function deleteUser(index) {
+    const data = JSON.parse(localStorage.getItem('users')) || [];
+    if (confirm("Are you sure to delete this record?")) {
+      data.splice(index, 1);
+      localStorage.setItem('users', JSON.stringify(data));
+      displayAll();
     }
   }
+
+  window.onload = displayAll;
 </script>
+
 </body>
 </html>

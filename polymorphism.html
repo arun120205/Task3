@@ -60,11 +60,23 @@
 
         td button {
             margin-right: 5px;
-            background-color: #2196F3;
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
         }
 
-        td button:last-child {
-            background-color: #f44336;
+        td button:nth-child(1) {
+            background-color: #6c757d; 
+        }
+
+        td button:nth-child(2) {
+            background-color: #2196F3; 
+        }
+
+        td button:nth-child(3) {
+            background-color: #f44336; 
         }
     </style>
 </head>
@@ -75,7 +87,7 @@
         <input type="text" id="name" placeholder="Name" required />
         <input type="number" id="age" placeholder="Age" required />
         <input type="email" id="email" placeholder="Email" required />
-        <input type="text" id="rollNo" placeholder="Roll No" required />
+        <input type="text" id="rollNo" placeholder="Roll No (10 digits)" required />
         <input type="text" id="course" placeholder="Course" required />
         <br>
         <button type="submit">Add / Update Student</button>
@@ -93,19 +105,29 @@
     </table>
 
     <script>
+        
         class Person {
             constructor(name, age, email) {
                 this.name = name;
                 this.age = age;
                 this.email = email;
             }
+
+            displayInfo() {
+                return `Name: ${this.name}, Age: ${this.age}, Email: ${this.email}`;
+            }
         }
 
+        
         class Student extends Person {
             constructor(name, age, email, rollNo, course) {
                 super(name, age, email);
                 this.rollNo = rollNo;
                 this.course = course;
+            }
+
+            displayInfo() {
+                return `Student: ${this.name}, Roll No: ${this.rollNo}, Course: ${this.course}`;
             }
         }
 
@@ -126,13 +148,15 @@
             const rollNo = document.getElementById('rollNo').value.trim();
             const course = document.getElementById('course').value.trim();
 
+            // Validation
             if (!/^[A-Za-z ]+$/.test(name)) {
                 alert("Name must contain letters only.");
                 return;
             }
+
             if (!/^\d{10}$/.test(rollNo)) {
-                 alert("Roll number must be exactly 10 digits.");
-                 return;
+                alert("Roll number must be exactly 10 digits.");
+                return;
             }
 
             const student = new Student(name, age, email, rollNo, course);
@@ -165,6 +189,7 @@
                 <td>${student.rollNo}</td>
                 <td>${student.course}</td>
                 <td>
+                    <button onclick="alert('${student.displayInfo()}')">Info</button>
                     <button onclick="editStudent(${index})">Edit</button>
                     <button onclick="deleteStudent(${index})">Delete</button>
                 </td>
